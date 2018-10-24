@@ -122,8 +122,64 @@ Note: you *must* stop playing if your player has gone bust. How will you handle 
 
 2. Repeat the previous problem with betting on black in American roulette, where the probability of winning on any spin is 18/38 for an even payout.
 
+```{r}
+
+trials_to_bust <- function (bankroll, num_bets, p) {
+  # create a vector which will contain the amounts of money gambler has after each bet 
+  # set the first element of this vector equal to the bankroll
+  sum <- c(bankroll)
+  
+  # simulating a sequence of bets
+  for (bet in 2:(num_bets+1)) {
+    if (sum[bet-1]!=0){
+      # +100 if rbinom(...) equals to 1, -100 if it equals to 0
+      sum[bet] <- sum[bet-1] - 100*(-1)^rbinom(1, size=1, prob=p) 
+    }else{
+      # break the loop if the sum of money left is 0
+      break
+    }
+  }
+  
+  # return the number of step where the gambler lost all money or 100 (if he still has money)
+  return(c(bet=bet, bankroll=sum[bet-1]))
+}
+
+iterations <- 5000
+hands <- 100
+# vector containing results from all iterations of trials_to_bust (number of bet)
+simulation <- replicate(iterations, trials_to_bust(1000,hands,18/38)["bet"])
+
+# simulation[simulation<100] - all simulations where the gambler got busted before 100th bet
+# proportion to the total number of iterations
+Pr_get_busted <- length(simulation[simulation<=hands])/iterations
+
+Pr_get_busted
+```
+
 3. **Markov Chains**. Suppose you have a game where the probability of winning on your first hand is 48%; each time you win, that probability goes up by one percentage point for the next game (to a maximum of 100%, where it must stay), and each time you lose, it goes back down to 48%. Assume you cannot go bust and that the size of your wager is a constant $100.
     a. Is this a fair game? Simulate one hundred thousand sequential hands to determine the size of your return. Then repeat this simulation 99 more times to get a range of values to calculate the expectation.
+```{r}
+markov_game <- function (bankroll, num_bets, p) {
+  sum <- c(bankroll)
+  prb <- p
+  for (bet in 2:(num_bets+1)) {
+      sum[bet] <- sum[bet-1] - 100*(-1)^rbinom(1, size=1, prb) # never go bust
+     
+      if (sum[bet]>sum[bet-1]) {
+        prb = min(prb+0.01, 1)  # not to exceed 1
+      } else{
+        prb = p
+      }
+  }
+  return(sum[bet])
+}
+iterations <- 100
+hands <- 100000
+# vector containing results from all iterations of markov_game
+simulation <- replicate(iterations, markov_game(0,hands,0.48))
+mean(simulation)
+
+```
     b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
     c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
 
