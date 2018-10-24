@@ -197,10 +197,10 @@ markov_game <- function (num_bets, p) {
   }
   return(sum[bet])
 }
+
 iterations <- 100
 hands <- 10000
 
-# vector containing results from all iterations of markov_game
 p_up <- 0.5      #unfair in a "+" way
 p_down <- 0.46   #unfair in a "-"
 simulation_med <- replicate(iterations, markov_game(hands,p_mean))
