@@ -40,7 +40,7 @@ Since you all have completed problem 1, you first step will be to work through e
 gamblersRuin <- function(nn, upprob=0.5, start.here=1000) {
   output <- rep(NA, nn)
   output[1] <- start.here
-  for(iteration in 2:nn) {
+  for(iteration in 2:nn+1) {
     output[iteration] <- output[iteration-1] + 200*rbinom(1,1,upprob) - 100 #iteration-100 to move up or down by 100
     
     if(output[iteration]==0){
@@ -97,11 +97,12 @@ mean.bust()
 ```
     d. the mean and variance of your bankroll after 100 hands (including busts).
     ```{r}
+
 #keep original gamblersRuin to maintain return value of money
 gamblersRuin.last <- function(nn=100, upprob=0.5, start.here=1000) { #nn is the number of hands you play per iteration
   output <- rep(NA, nn)
   output[1] <- start.here
-  for(iteration in 2:nn) {
+  for(iteration in 2:(nn+1)) {
     output[iteration] <- output[iteration-1] + 200*rbinom(1,1,upprob) - 100 #move up or down by 100
     
     if(output[iteration]==0){
@@ -114,38 +115,177 @@ gamblersRuin.last <- function(nn=100, upprob=0.5, start.here=1000) { #nn is the 
 }
 
 #create function to calculate mean and variance of bankroll
-mean.sd <- function(n = 1000) { #refers to 1000 iterations
+mean.var <- function(n = 5000) { #refers to 1000 iterations
   output <- rep(NA, n)
   for(i in 1:n){
     play <- gamblersRuin.last(100) #play gambler's ruin 100 times
     output[i] <- play
   }
-  return(c(mean(output), sd(output)))
+  return(c(mean(output), var(output)))
 }
-mean.sd()
+mean.var()
 ```
     e. the mean and variance of your bankroll after 500 hands (including busts).
     ```{r}
-mean.sd <- function(n = 1000) { #refers to 1000 iterations
+mean.var <- function(n = 5000) { #refers to 1000 iterations
   output <- rep(NA, n)
   for(i in 1:n){
-    play <- gamblersRuin.last(500) #play gambler's ruin 500 times
+    play <- gamblersRuin.last(500) #play gambler's ruin 100 times
     output[i] <- play
   }
-  return(c(mean(output), sd(output)))
+  return(c(mean(output), var(output)))
 }
+mean.var()
 
-mean.sd()
 ```
  
 Note: you *must* stop playing if your player has gone bust. How will you handle this in the `for` loop?
 
 2. Repeat the previous problem with betting on black in American roulette, where the probability of winning on any spin is 18/38 for an even payout.
+```{r}
+trials_to_bust <- function (bankroll, num_bets, p) {
+  # create a vector which will contain the amounts of money gambler has after each bet 
+  # set the first element of this vector equal to the bankroll
+  sum <- c(bankroll)
+  
+  # simulating a sequence of bets
+  for (bet in 2:(num_bets+1)) {
+    if (sum[bet-1]!=0){
+      # +100 if rbinom(...) equals to 1, -100 if it equals to 0
+      sum[bet] <- sum[bet-1] - 100*(-1)^rbinom(1, size=1, prob=p) 
+    }else{
+      # break the loop if the sum of money left is 0
+      break
+    }
+  }
+  
+  # return the number of step where the gambler lost all money or 100 (if he still has money)
+  return(c(bet=bet, bankroll=sum[bet-1]))
+}
+
+iterations <- 5000
+hands <- 100
+# vector containing results from all iterations of trials_to_bust (number of bet)
+simulation <- replicate(iterations, trials_to_bust(1000,spins,18/38)["bet"])
+
+# simulation[simulation<100] - all simulations where the gambler got busted before 100th bet
+# proportion to the total number of iterations
+Pr_get_busted <- length(simulation[simulation<=spins])/iterations
+
+Pr_get_busted
+```
+
 
 3. **Markov Chains**. Suppose you have a game where the probability of winning on your first hand is 48%; each time you win, that probability goes up by one percentage point for the next game (to a maximum of 100%, where it must stay), and each time you lose, it goes back down to 48%. Assume you cannot go bust and that the size of your wager is a constant $100.
     a. Is this a fair game? Simulate one hundred thousand sequential hands to determine the size of your return. Then repeat this simulation 99 more times to get a range of values to calculate the expectation.
+    ```{r, eval=FALSE}
+#function constants are playing 100,000 hands and repeat simulation 99 times
+#we will still go up and down by $100
+#want to play one hand at a time, observe if the output increased by $100. If it did, then increase the probability by 1%. If we lost $100, then reset probability to 48%
+# markov.chain <- function(x, p = 0.48){ #x is the number of hands we play
+#   outcomes <- rep(NA, x)
+#   outcomes <- 0
+#   for(i in 2:x) {
+#     output[i] <- output[i-1] + 200*rbinom(1, 1, p) - 100
+#   
+#   if(diff(ouput[[i]] > 100) {
+#     return(probStart + 0.01)
+#   } else {
+#     return(probStart == 0.48)
+#   }
+
+#commenting Frank's code 
+game.Sim<- function(N){ #create a function for a simulation for the markov chain
+Total=0 #begin with $0
+  
+game.hand <- rep(NA,N) #create an empty vector to store how much money you win at the end of each hand
+Probability<-.48 #initial probability
+
+for (i in 1:N){ #for each hand
+  hand<-rbinom(1,1,Probability) #game simulation function to tell us if we either win or lose each game
+  if(hand==1){#This is a win
+    Total=Total+100 #gain $100 if you win
+    Probability=Probability+.01 #add 1% to the probability if you win
+      if(Probability>1){ #add a control to prevent your probability from going past 100%
+        Probability=1
+      }
+  }else{
+    Total=Total-100 #if you lose, deduct $100 from your total amount
+    Probability=.48 #reset the probability
+  }
+}
+
+return(Total) #return the total amount left at the end of the simulations
+
+}
+
+mean(replicate(100,game.Sim(100000)))
+```
     b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
+```{r}
+game.Sim<- function(N,p){ 
+Total=0 
+  
+game.hand <- rep(NA,N) 
+Probability<-p
+
+for (i in 1:N){
+  hand<-rbinom(1,1,Probability)
+  if(hand==1){#This is a win
+    Total=Total+100
+    Probability=Probability+.01
+      if(Probability>1){
+        Probability=1
+      }
+  }else{
+    Total=Total-100
+    Probability=p
+  }
+}
+
+return(Total)
+
+}
+
+#We start p at .485 since we know that .48 is unfair and .50 is unfair (but in the boon of the player) 
+p <-.49 #start at .49 because we know that .48 is unfair and .50 is unfair, so starting at .49 is the mid of that 
+pmax<-.50 
+pmin<-.46
+FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value
+
+while(1){ #tells r to keep running while loop
+Final<-mean(replicate(100,game.Sim(10000,p)))#Simulation # reduced to allow program to run
+
+print(paste("Current p is ",p,"while amount lost/gained is ",Final ))
+
+if(Final<0) #if the $ leftover if less than 0
+{
+  pmin<-p
+  p<-p+(pmax-p)/2 #Increment by 1/2 of the difference if too large
+}else if (Final>0){
+  pmax<-p
+  p<-p-(p-pmin)/2 #Increment by 1/2 of the difference if too small
+}
+
+
+
+
+if(abs(FinalPrevious)<abs(Final) & abs(FinalPrevious)<100){ #This looks for the tipping point in our chain where our increment made things worse instead of better, we also want to give some portion of what we consider "small enough" here we use 1
+  print(paste("Final P is ",p," while the amount loss/gained is ",FinalPrevious))
+  break
+}
+
+FinalPrevious <- Final
+
+}
+
+```
+    
     c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
+```{r}
+
+```
+  
 
 
 4. Creating a Bootstrap function. There is a particular concept called [bootstrapping]
