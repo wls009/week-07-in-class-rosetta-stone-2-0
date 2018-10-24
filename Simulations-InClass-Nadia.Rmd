@@ -193,9 +193,8 @@ Pr_get_busted
 #   } else {
 #     return(probStart == 0.48)
 #   }
-```
-    b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
-```{r}
+
+#commenting Frank's code 
 game.Sim<- function(N){ #create a function for a simulation for the markov chain
 Total=0 #begin with $0
   
@@ -221,16 +220,13 @@ return(Total) #return the total amount left at the end of the simulations
 }
 
 mean(replicate(100,game.Sim(100000)))
-
-
 ```
-    
-    c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
+    b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
 ```{r}
-game.Sim<- function(N,p){ #create a function in the markov chain with variables 
-Total=0
+game.Sim<- function(N,p){ 
+Total=0 
   
-game.hand <- rep(NA,N)
+game.hand <- rep(NA,N) 
 Probability<-p
 
 for (i in 1:N){
@@ -252,17 +248,17 @@ return(Total)
 }
 
 #We start p at .485 since we know that .48 is unfair and .50 is unfair (but in the boon of the player) 
-p <-.485 
-pmax<-.50
+p <-.49 #start at .49 because we know that .48 is unfair and .50 is unfair, so starting at .49 is the mid of that 
+pmax<-.50 
 pmin<-.46
 FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value
 
-while(1){
+while(1){ #tells r to keep running while loop
 Final<-mean(replicate(100,game.Sim(10000,p)))#Simulation # reduced to allow program to run
 
 print(paste("Current p is ",p,"while amount lost/gained is ",Final ))
 
-if(Final<0)
+if(Final<0) #if the $ leftover if less than 0
 {
   pmin<-p
   p<-p+(pmax-p)/2 #Increment by 1/2 of the difference if too large
@@ -282,6 +278,12 @@ if(abs(FinalPrevious)<abs(Final) & abs(FinalPrevious)<100){ #This looks for the 
 FinalPrevious <- Final
 
 }
+
+```
+    
+    c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
+```{r}
+
 ```
   
 
