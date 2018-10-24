@@ -159,8 +159,8 @@ Pr_get_busted
 3. **Markov Chains**. Suppose you have a game where the probability of winning on your first hand is 48%; each time you win, that probability goes up by one percentage point for the next game (to a maximum of 100%, where it must stay), and each time you lose, it goes back down to 48%. Assume you cannot go bust and that the size of your wager is a constant $100.
     a. Is this a fair game? Simulate one hundred thousand sequential hands to determine the size of your return. Then repeat this simulation 99 more times to get a range of values to calculate the expectation.
 ```{r}
-markov_game <- function (bankroll, num_bets, p) {
-  sum <- c(bankroll)
+markov_game <- function (num_bets, p) {
+  sum <- c(0)
   prb <- p
   for (bet in 2:(num_bets+1)) {
       sum[bet] <- sum[bet-1] - 100*(-1)^rbinom(1, size=1, prb) # never go bust
@@ -176,11 +176,55 @@ markov_game <- function (bankroll, num_bets, p) {
 iterations <- 100
 hands <- 100000
 # vector containing results from all iterations of markov_game
-simulation <- replicate(iterations, markov_game(0,hands,0.48))
-mean(simulation)
+simulation <- replicate(iterations, markov_game(hands,0.48))
+mean(simulation) #mean is < 0, so it's an unfair game
 
 ```
     b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
+    
+```{r}  
+markov_game <- function (num_bets, p) {
+  sum <- c(0)
+  prb <- p
+  for (bet in 2:(num_bets+1)) {
+      sum[bet] <- sum[bet-1] - 100*(-1)^rbinom(1, size=1, prb) # never go bust
+     
+      if (sum[bet]>sum[bet-1]) {
+        prb = min(prb+0.01, 1)  # not to exceed 1
+      } else{
+        prb = p
+      }
+  }
+  return(sum[bet])
+}
+iterations <- 100
+hands <- 1000
+
+# vector containing results from all iterations of markov_game
+p_up <- 0.5      #unfair in a "+" way
+p_down <- 0.46   #unfair in a "-"
+simulation_med <- replicate(iterations, markov_game(hands,p_mean))
+
+while (abs(mean(simulation_med))>100) {
+  simulation_up <- replicate(iterations, markov_game(hands,p_up))
+  simulation_down <- replicate(iterations, markov_game(hands,p_down))
+
+  p_mean <- (p_up+p_down)/2
+  simulation_med <- replicate(iterations, markov_game(hands,p_mean))
+
+  if(mean(simulation_up)*mean(simulation_med)<0){
+    p_down <- (p_up+p_down)/2
+  }else if (mean(simulation_down)*mean(simulation_med)<0){
+    p_up <- (p_up+p_down)/2
+  } else{
+    break
+  }
+}
+
+print(p_mean)
+print(mean(simulation_med))
+
+```
     c. Repeat again, keeping the initial probability at 48%, but this time change the probability increment to a value different from 1%. Get the expected return after 100 repetitions. Keep changing this value until you have a return value that is as fair as you can make it. 
 
 
