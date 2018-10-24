@@ -206,22 +206,17 @@ p_down <- 0.46   #unfair in a "-"
 simulation_med <- replicate(iterations, markov_game(hands,p_mean))
 
 while (abs(mean(simulation_med))>100) {
-  simulation_up <- replicate(iterations, markov_game(hands,p_up))
-  simulation_down <- replicate(iterations, markov_game(hands,p_down))
+  p <- mean(c(p_up,p_down))
+  simulation_med <- replicate(iterations, markov_game(hands,p))
 
-  p_mean <- (p_up+p_down)/2
-  simulation_med <- replicate(iterations, markov_game(hands,p_mean))
-
-  if(mean(simulation_up)*mean(simulation_med)<0){
-    p_down <- (p_up+p_down)/2
-  }else if (mean(simulation_down)*mean(simulation_med)<0){
-    p_up <- (p_up+p_down)/2
-  } else{
-    break
+  if(mean(simulation_med)<=0){
+    p_down <- p
+  }else{
+    p_up <- p
   }
 }
 
-print(p_mean)
+print(p)
 print(mean(simulation_med))
 
 ```
