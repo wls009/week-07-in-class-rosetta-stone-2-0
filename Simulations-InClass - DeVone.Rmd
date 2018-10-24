@@ -40,6 +40,93 @@ Since you all have completed problem 1, you first step will be to work through e
     d. the mean and variance of your bankroll after 100 hands (including busts).
     e. the mean and variance of your bankroll after 500 hands (including busts).
  
+```{r}
+
+GameSimulation <- function(N,bet,total){
+  
+  for(i in 1:N){
+    game<-rbinom(1,1,.5)
+    if(game==1){
+      total= total+bet
+    }else if(game==0){
+      total= total-bet
+    }
+    
+    if(total<bet){
+      return(1)
+      break
+    }
+    
+  }
+  return(0)
+}
+
+GameSimulationTotal <- function(N,bet,total){
+  
+  for(i in 1:N){
+    game<-rbinom(1,1,.5)
+    if(game==1){
+      total= total+bet
+    }else if(game==0){
+      total= total-bet
+    }
+    
+    if(total<bet){
+      return(i)
+      break
+    }
+    
+  }
+  return(NA)
+}
+
+GameSimulationBankroll <- function(N,bet,total){
+  
+  for(i in 1:N){
+    game<-rbinom(1,1,.5)
+    if(game==1){
+      total= total+bet
+    }else if(game==0){
+      total= total-bet
+    }
+    
+    if(total<bet){
+      return(total)
+      break
+    }
+    
+  }
+  return(total)
+}
+
+#For our simulations 1 is a loss and 0 is a win! 
+
+#Test for 100
+Test.100<- replicate(5000, GameSimulation(100,100,1000))
+sum(Test.100/5000)
+
+#Test for 500
+Test.500<- replicate(5000, GameSimulation(500,100,1000))
+sum(Test.500/5000)
+
+#Calculate mean
+
+Test.Mean.5000<- replicate(5000, GameSimulationTotal(5000,100,1000))
+mean(Test.Mean.5000, na.rm = TRUE)
+
+#the mean and variance of your bankroll after 100 hands
+
+Test.Bankroll.100<- replicate(5000, GameSimulationTotal(100,100,1000))
+mean(Test.Bankroll.100, na.rm = TRUE)
+var(Test.Bankroll.100, na.rm = TRUE)
+
+#the mean and variance of your bankroll after 100 hands
+
+Test.Bankroll.500<- replicate(5000, GameSimulationTotal(500,100,1000))
+mean(Test.Bankroll.500, na.rm = TRUE)
+var(Test.Bankroll.500, na.rm = TRUE)
+```
+ 
 Note: you *must* stop playing if your player has gone bust. How will you handle this in the `for` loop?
 
 2. Repeat the previous problem with betting on black in American roulette, where the probability of winning on any spin is 18/38 for an even payout.
