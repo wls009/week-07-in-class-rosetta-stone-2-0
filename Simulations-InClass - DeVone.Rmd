@@ -42,6 +42,8 @@ Since you all have completed problem 1, you first step will be to work through e
  
 ```{r}
 
+
+
 GameSimulation <- function(N,bet,total){
   
   for(i in 1:N){
@@ -81,7 +83,7 @@ GameSimulationTotal <- function(N,bet,total){
 }
 
 GameSimulationBankroll <- function(N,bet,total){
-  
+ #set.seed(1234)
   for(i in 1:N){
     game<-rbinom(1,1,.5)
     if(game==1){
@@ -116,13 +118,13 @@ mean(Test.Mean.5000, na.rm = TRUE)
 
 #the mean and variance of your bankroll after 100 hands
 
-Test.Bankroll.100<- replicate(5000, GameSimulationTotal(100,100,1000))
+Test.Bankroll.100<- replicate(5000, GameSimulationBankroll(100,100,1000))
 mean(Test.Bankroll.100, na.rm = TRUE)
 var(Test.Bankroll.100, na.rm = TRUE)
 
-#the mean and variance of your bankroll after 100 hands
+#the mean and variance of your bankroll after 500 hands
 
-Test.Bankroll.500<- replicate(5000, GameSimulationTotal(500,100,1000))
+Test.Bankroll.500<- replicate(5000, GameSimulationBankroll(500,100,1000))
 mean(Test.Bankroll.500, na.rm = TRUE)
 var(Test.Bankroll.500, na.rm = TRUE)
 ```
