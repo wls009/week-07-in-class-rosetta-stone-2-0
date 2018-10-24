@@ -294,6 +294,10 @@ FinalPrevious <- Final
 The steps of this process are:
 
   a. Draw a sample, with replacement, from your data which is the same length of your data.
+```{r}
+
+```
+
   b. Calculate the statistic of interest on this boostrap sample (ie mean, variance, regression,...)
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
   d. The lower bound of a 95% CI will be the 0.025 percentile
