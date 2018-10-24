@@ -198,7 +198,7 @@ markov_game <- function (num_bets, p) {
   return(sum[bet])
 }
 iterations <- 100
-hands <- 1000
+hands <- 10000
 
 # vector containing results from all iterations of markov_game
 p_up <- 0.5      #unfair in a "+" way
@@ -214,6 +214,7 @@ while (abs(mean(simulation_med))>100) {
   }else{
     p_up <- p
   }
+#print(paste("Current p is", p, "and current mean is", mean(simulation_med)))
 }
 
 print(p)
