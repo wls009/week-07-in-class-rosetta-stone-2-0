@@ -245,8 +245,9 @@ for (i in 1:N){
 return(Total)
 
 }
-
-mean(replicate(100,game.Sim(100000)))
+x<-replicate(100,game.Sim(100000))
+mean(x)
+var(x)
 #Not very fair, our simulations are always very negative
 ```
     
@@ -278,7 +279,7 @@ return(Total)
 }
 
 #We start p at .485 since we know that .48 is unfair and .50 is unfair (but in the boon of the player) 
-p <-.485 
+p <-.46
 pmax<-.50
 pmin<-.46
 FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value
@@ -385,7 +386,20 @@ FinalPrevious <- Final
 The steps of this process are:
 
   a. Draw a sample, with replacement, from your data which is the same length of your data.
+  
+```{r}
+data<-replicate(100,game.Sim(100000))
+
+sample<- sample(data, length(data), replace = TRUE)
+```
+  
   b. Calculate the statistic of interest on this boostrap sample (ie mean, variance, regression,...)
+  
+```{r}
+
+```
+  
+  
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
   d. The lower bound of a 95% CI will be the 0.025 percentile
   e. The upper bound of a 95% CI will be the 0.975 percentile
