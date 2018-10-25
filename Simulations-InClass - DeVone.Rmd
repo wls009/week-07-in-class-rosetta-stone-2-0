@@ -397,12 +397,51 @@ sample<- sample(data, length(data), replace = TRUE)
   
 ```{r}
 
+mean(sample)
+
 ```
   
   
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
+  
+```{r}
+Statistics<-c()
+
+for(i in 1:1000){
+  sample<- sample(data, length(data), replace = TRUE)
+  Statistics[i]<-mean(sample)
+}
+
+```
+  
   d. The lower bound of a 95% CI will be the 0.025 percentile
   e. The upper bound of a 95% CI will be the 0.975 percentile
+```{r}
+mean(Statistics)*.975
+mean(Statistics)*.025
+```
+  
+  
+  
+  
+  
+```{r}
+install.packages("gmodels")
+library(gmodels)
+  SD <- sd(Statistics)
+  Mean <- mean(sample)
+  
+  CI = Mean + c(-1,1)*2*SD
+  print(CI)
+  
+  
+  
+  ci(sample)
+  
+```
+  
+
+  
 
 Make a function called `boot_ci` which calculates the 95% confidence interval in this manner. 
 
