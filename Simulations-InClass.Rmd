@@ -168,7 +168,7 @@ Pr_get_busted
     a. Is this a fair game? Simulate one hundred thousand sequential hands to determine the size of your return. Then repeat this simulation 99 more times to get a range of values to calculate the expectation.
 ```{r}
 #commenting Frank's code 
-game.Sim<- function(N){ #create a function for a simulation for the markov chain
+game.Sim.Basic<- function(N){ #create a function for a simulation for the markov chain
 Total=0 #begin with $0
   
 game.hand <- rep(NA,N) #create an empty vector to store how much money you win at the end of each hand
@@ -192,7 +192,7 @@ return(Total) #return the total amount left at the end of the simulations
 
 }
 
-mean(replicate(100,game.Sim(100000)))
+mean(replicate(100,game.Sim.Basic(100000)))
 ```
 **Result is not a fair game as the amount left is not close to $0, which you would expect if you begin with $0 and if this is a fair game.** 
     b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
@@ -230,7 +230,7 @@ FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value so w
 while(1){ #tells r to keep running while loop
 Final<-mean(replicate(100,game.Sim(100000,p)))#Simulation reduced to allow program to run - will start at 100000 though
 
-print(paste("Current p is ",p,"while amount lost/gained is ",Final ))  #statement to see simulation at work
+#print(paste("Current p is ",p,"while amount lost/gained is ",Final ))  #statement to see simulation at work
 
 if(Final<0) #if the $ leftover if less than 0
 {
@@ -292,7 +292,7 @@ FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value
 while(1){
 Final<-mean(replicate(100,game.Sim(10000,p,increment)))#Simulation # reduced to allow program to run
 
-print(paste("Current increment is ",increment,"while amount lost/gained is ",Final )) #statement to see simulation at work
+#print(paste("Current increment is ",increment,"while amount lost/gained is ",Final )) #statement to see simulation at work
 
 if(Final<0) #same but instead of changing p, we are changing the increment we are moving by
 {
@@ -328,7 +328,49 @@ The steps of this process are:
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
   d. The lower bound of a 95% CI will be the 0.025 percentile
   e. The upper bound of a 95% CI will be the 0.975 percentile
+  
+  Make a function called `boot_ci` which calculates the 95% confidence interval in this manner. 
+  
+**We did the above all at once with the below function**
+```{r}
+boot_ci <- function(df) {
+  #create an empty df to store stata (means, vars, etc...)
+  stata_df <- data.frame()
+ 
+  for (i in 1:1000){ #repeating 1000 times
+   #sample rows with replacement #4a
+    my_sample <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ] 
+   
+   #applying "mean" to the 2nd dim (columns) #4b
+    stata <- apply(my_sample,2,mean) 
+    
+   #add a new stata row to stata_df
+    stata_df <- rbind(stata_df, stata)
+  }
 
-Make a function called `boot_ci` which calculates the 95% confidence interval in this manner. 
+  #now we need to find CI for each column of stata_df given percentiles
+  #create a df of CIs
+  CI_df <- data.frame()
+  
+  for (j in 1:ncol(stata_df)) {
+    #calculate margin of error based in bounds
+    m <- mean(quantile(stata_df[,j], c(0.975,0.025))) 
+    
+    #calculate mean given bounds and margin error
+    mar <- quantile(stata_df[,j], 0.975) - m
+    
+    CI_df <- rbind(CI_df, list(m, "+/-", mar))
+  }
+  
+  names(CI_df) <- c("mean", "+/-", "margin of error")
+  rownames(CI_df) <- colnames(df)
+  return(CI_df)
+}
+
+my_data <- replicate(100, game.Sim.Basic(10000))
+boot_ci(my_data)
+```
+
+
 
 5. For problems 3b and 3c, you calculated a mean value. Because you saved these final results in a vector, use the bootstrap to estimate the variance of the return in each case for your final answer. Once you have these results, which game has the smaller variance in returns?
