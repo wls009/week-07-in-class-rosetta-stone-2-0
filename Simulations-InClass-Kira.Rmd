@@ -238,41 +238,26 @@ The steps of this process are:
 Make a function called `boot_ci` which calculates the 95% confidence interval in this manner. 
 
 ```{r}
-boot_ci <- function(df) {
+boot_ci <- function(c) {
   #create an empty df to store stata (means, vars, etc...)
-  stata_df <- data.frame()
+  stata_vec <- c()
  
   for (i in 1:1000){ #repeating 1000 times
    #sample rows with replacement #4a
-    my_sample <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ] 
+    my_sample <- sample(x = c, size = length(c), replace=TRUE) 
    
-   #applying "mean" to the 2nd dim (columns) #4b
-    stata <- apply(my_sample,2,mean) 
-    
-   #add a new stata row to stata_df
-    stata_df <- rbind(stata_df, stata)
+   #applying "mean" 
+    stata_vec[i] <- mean(my_sample)
   }
 
-  #now we need to find CI for each column of stata_df given percentiles
-  #create a df of CIs
-  CI_df <- data.frame()
-  
-  for (j in 1:ncol(stata_df)) {
-    #calculate margin of error based in bounds
-    m <- mean(quantile(stata_df[,j], c(0.975,0.025))) 
+  #now we need to find CI for stata_vec given percentiles
+  CI <- quantile(stata_vec, c(0.975,0.025)) 
     
-    #calculate mean given bounds and margin error
-    mar <- quantile(stata_df[,j], 0.975) - m
-    
-    CI_df <- rbind(CI_df, list(m, "+/-", mar))
-  }
-  
-  names(CI_df) <- c("mean", "+/-", "margin of error")
-  rownames(CI_df) <- colnames(df)
-  return(CI_df)
+  return(CI)
 }
 
-my_data <- women
+#my_data <- women
+my_data <- replicate(100, markov_game(1000,.48))
 boot_ci(my_data)
 ```
   
