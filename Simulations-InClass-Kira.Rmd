@@ -230,20 +230,45 @@ print(mean(simulation_med))
 The steps of this process are:
 
   a. Draw a sample, with replacement, from your data which is the same length of your data.
-```{r}
-my_sample <- function(df){
-  s <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ]
-  return(s)
-}
-
-my_data <- WorldPhones
-my_sample(my_data)
-```
   b. Calculate the statistic of interest on this boostrap sample (ie mean, variance, regression,...)
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
   d. The lower bound of a 95% CI will be the 0.025 percentile
   e. The upper bound of a 95% CI will be the 0.975 percentile
 
 Make a function called `boot_ci` which calculates the 95% confidence interval in this manner. 
+
+```{r}
+boot_ci <- function(df) {
+  #create an empty df to store stata
+  stata_df <- data.frame()
+ 
+  for (i in 1:1000){ #repeating 1000 times
+   #sample rows with replacement #4a
+    my_sample <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ] 
+   
+   #applying "mean" to the 2nd dim (columns) #4b
+    stata <- apply(my_sample,2,mean) 
+    
+   #add a new stata row to stata_df
+    stata_df <- rbind(stata_df, stata)
+  }
+  
+  #now we need to find percentiles and CI for each column of stata_df
+  #df of bounds and CI
+  bounds <- data.frame()
+  
+  for (j in 1:ncol(stata_df)) {
+    bounds <- rbind(bounds, quantile(stata_df[,j], c(0.025,0.975)))
+  }
+  
+  names(bounds) <- c("lower","upper")
+
+  return(bounds)
+}
+
+my_data <- WorldPhones
+boot_ci(my_data)
+```
+  
 
 5. For problems 3b and 3c, you calculated a mean value. Because you saved these final results in a vector, use the bootstrap to estimate the variance of the return in each case for your final answer. Once you have these results, which game has the smaller variance in returns?
