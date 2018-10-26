@@ -258,8 +258,12 @@ boot_ci <- function(df) {
   CI_df <- data.frame()
   
   for (j in 1:ncol(stata_df)) {
-    m <- (quantile(stata_df[,j], 0.975)-quantile(stata_df[,j],0.025)) / 2 #calculate mean based in bounds
+    #calculate margin of error based in bounds
+    m <- mean(quantile(stata_df[,j], c(0.975,0.025))) 
+    
+    #calculate mean given bounds and margin error
     mar <- quantile(stata_df[,j], 0.975) - m
+    
     CI_df <- rbind(CI_df, list(m, "+/-", mar))
   }
   
@@ -268,7 +272,7 @@ boot_ci <- function(df) {
   return(CI_df)
 }
 
-my_data <- WorldPhones
+my_data <- women
 boot_ci(my_data)
 ```
   
