@@ -239,7 +239,7 @@ Make a function called `boot_ci` which calculates the 95% confidence interval in
 
 ```{r}
 boot_ci <- function(df) {
-  #create an empty df to store stata
+  #create an empty df to store stata (means, vars, etc...)
   stata_df <- data.frame()
  
   for (i in 1:1000){ #repeating 1000 times
@@ -252,18 +252,20 @@ boot_ci <- function(df) {
    #add a new stata row to stata_df
     stata_df <- rbind(stata_df, stata)
   }
-  
-  #now we need to find percentiles and CI for each column of stata_df
-  #df of bounds and CI
-  bounds <- data.frame()
+
+  #now we need to find CI for each column of stata_df given percentiles
+  #create a df of CIs
+  CI_df <- data.frame()
   
   for (j in 1:ncol(stata_df)) {
-    bounds <- rbind(bounds, quantile(stata_df[,j], c(0.025,0.975)))
+    m <- (quantile(stata_df[,j], 0.975)-quantile(stata_df[,j],0.025)) / 2 #calculate mean based in bounds
+    mar <- quantile(stata_df[,j], 0.975) - m
+    CI_df <- rbind(CI_df, list(m, "+/-", mar))
   }
   
-  names(bounds) <- c("lower","upper")
-
-  return(bounds)
+  names(CI_df) <- c("mean", "+/-", "margin of error")
+  rownames(CI_df) <- colnames(df)
+  return(CI_df)
 }
 
 my_data <- WorldPhones
