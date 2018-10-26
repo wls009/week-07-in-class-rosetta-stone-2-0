@@ -195,7 +195,8 @@ return(Total) #return the total amount left at the end of the simulations
 mean(replicate(100,game.Sim.Basic(100000)))
 ```
 **Result is not a fair game as the amount left is not close to $0, which you would expect if you begin with $0 and if this is a fair game.** 
-    b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
+     b. Repeat this process but change the starting probability to a new value within 2% either way. Get the expected return after 100 repetitions. Keep exploring until you have a return value that is as fair as you can make it. Can you do this automatically?
+    
 ```{r}
 game.Sim<- function(N,p){ #new variables are #of hands and starting probability
 Total=0 
@@ -333,41 +334,26 @@ The steps of this process are:
   
 **We did the above all at once with the below function**
 ```{r}
-boot_ci <- function(df) {
+boot_ci <- function(c) {
   #create an empty df to store stata (means, vars, etc...)
-  stata_df <- data.frame()
+  stata_vec <- c()
  
   for (i in 1:1000){ #repeating 1000 times
    #sample rows with replacement #4a
-    my_sample <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ] 
+    my_sample <- sample(x = c, size = length(c), replace=TRUE) 
    
-   #applying "mean" to the 2nd dim (columns) #4b
-    stata <- apply(my_sample,2,mean) 
-    
-   #add a new stata row to stata_df
-    stata_df <- rbind(stata_df, stata)
+   #applying "mean" 
+    stata_vec[i] <- mean(my_sample)
   }
 
-  #now we need to find CI for each column of stata_df given percentiles
-  #create a df of CIs
-  CI_df <- data.frame()
-  
-  for (j in 1:ncol(stata_df)) {
-    #calculate margin of error based in bounds
-    m <- mean(quantile(stata_df[,j], c(0.975,0.025))) 
+  #now we need to find CI for stata_vec given percentiles
+  CI <- quantile(stata_vec, c(0.975,0.025)) 
     
-    #calculate mean given bounds and margin error
-    mar <- quantile(stata_df[,j], 0.975) - m
-    
-    CI_df <- rbind(CI_df, list(m, "+/-", mar))
-  }
-  
-  names(CI_df) <- c("mean", "+/-", "margin of error")
-  rownames(CI_df) <- colnames(df)
-  return(CI_df)
+  return(CI)
 }
 
-my_data <- replicate(100, game.Sim.Basic(10000))
+#my_data <- women
+my_data <- replicate(100, game.Sim.Basic(100000))
 boot_ci(my_data)
 ```
 
