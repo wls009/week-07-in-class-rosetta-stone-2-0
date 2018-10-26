@@ -231,11 +231,13 @@ The steps of this process are:
 
   a. Draw a sample, with replacement, from your data which is the same length of your data.
 ```{r}
+my_sample <- function(df){
+  s <- df[sample(x = nrow(df), size = nrow(df), replace=TRUE), ]
+  return(s)
+}
+
 my_data <- WorldPhones
-
-my_sample <- my_data[sample(x = nrow(my_data), size = nrow(my_data), replace=TRUE), ]
-
-my_sample
+my_sample(my_data)
 ```
   b. Calculate the statistic of interest on this boostrap sample (ie mean, variance, regression,...)
   c. Peform steps 1:2 at least 1000 times over until you have a vector of your statistics. 
