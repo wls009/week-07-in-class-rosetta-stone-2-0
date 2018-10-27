@@ -291,7 +291,7 @@ incrementMax<-1 #prevents our p value from going above 1
 FinalPrevious<-  1000000000000000000000 #Arbitrialiary large Starting Value
 
 while(1){
-Final<-mean(replicate(100,game.Sim(10000,p,increment)))#Simulation # reduced to allow program to run
+Final<-mean(replicate(100,game.Sim(100000,p,increment)))#Simulation # reduced to allow program to run
 
 #print(paste("Current increment is ",increment,"while amount lost/gained is ",Final )) #statement to see simulation at work
 
